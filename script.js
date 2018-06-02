@@ -10,7 +10,7 @@ class Observation {
     }
 
     getDate() {
-        return this.issued
+        return this.data.issued
     }
 }
 
@@ -35,13 +35,11 @@ class Patient {
         var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
         var xmlHttp = new XMLHttpRequest();
         getPatientsUrl = serverUrl + "/Observation?patient=" + this.getId() + "&_sort=date&_format=json"
-        console.log(getPatientsUrl)
         xmlHttp.open( "GET", getPatientsUrl, false ); // false for synchronous request
         xmlHttp.send(null);
         var entries = JSON.parse(xmlHttp.responseText).entry
-        console.log(entries)
         return entries.map((e)=> {
-            return e.entry
+            return new Observation(e.resource)
         })
     }
 
@@ -60,14 +58,18 @@ function getPatients() {
     var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
     var xmlHttp = new XMLHttpRequest();
     getPatientsUrl = serverUrl + "/Patient/?_format=json"
-    console.log(getPatientsUrl)
     xmlHttp.open( "GET", getPatientsUrl, false ); // false for synchronous request
     xmlHttp.send(null);
     return JSON.parse(xmlHttp.responseText).entry.map((p) => {
-        return p.resource
+        return new Patient(p.resource)
     })
 }
 
 patientList = getPatients()
-patient = new Patient(patientList[0])
-patient.getObservations()
+for(patient of patientList) {
+    console.log(patient.getName(), patient.getSurname())
+    for (observation of patient.getObservations()) {
+        console.log(observation.getDate(), observation.getDescription())
+    }
+    
+}
