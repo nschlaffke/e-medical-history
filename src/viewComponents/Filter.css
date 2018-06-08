@@ -1,0 +1,10 @@
+#nameForm {
+    margin: 1em;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.formElement {
+    margin: 1em;
+}

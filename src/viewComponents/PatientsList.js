@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Patient } from '../helpers/resourceManager'
 import { PatientName } from './PatientName'
+import { Filter } from './Filter'
+import './PatientsList.css'
 
 export class PatientsList extends Component {
   
@@ -10,8 +12,11 @@ export class PatientsList extends Component {
     this.serverUrl = "http://localhost:8080/baseDstu3"
     this.allPatients = []
 
+    this.retrieveName = this.retrieveName.bind(this)
+
     this.state = {
-      isFetched: false
+      isFetched: false,
+      searchedSurname: ""
     };
   }
 
@@ -34,20 +39,46 @@ export class PatientsList extends Component {
       .catch(err => console.error(err));
   }
 
-  getNameList(){
-    let nameList = this.allPatients.map((p) => {
-          return <PatientName name={ p.getName() } surname={ p.getSurname() } />;
-      });
+  findPatientBySurname(surname){
+    for (let patient of this.allPatients){
+      if(patient.getSurname() === surname){
+        return patient; 
+      }
+    }
+  }
+
+  getNameList(surname){
+    let nameList = this.allPatients
+    .filter((patient) => {
+
+      if(this.state.searchedSurname === ""){
+        return true;
+      }
+      else {
+        return patient.getSurname() === this.state.searchedSurname;
+      }
+    }).map((patient) => {
+
+      return <PatientName key={ patient.getId() } name={ patient.getName() } surname={ patient.getSurname() } />;
+    });
 
     return nameList;
+  }
+
+  retrieveName(surname){
+    this.setState({ searchedSurname: surname });
   }
   
   render() {
 
     return (
-      <ol>
-        { this.getNameList() }
-      </ol>  
+      <div>
+        <Filter retrieveName={ this.retrieveName }/>
+        <h1> The list of patients: </h1>
+        <ol>
+          { this.getNameList(this.state.searchedSurname) }
+        </ol> 
+      </div> 
     );
   }
 }
