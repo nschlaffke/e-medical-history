@@ -16,14 +16,16 @@ export class Observation {
 
     getDetails() {
         var field;
+        var resourceType = this.data.resourceType;
         var def = "empty"
         try {
-            field = this.data.valueCodeableConcept.text;
+            field = this.data.valueCodeableConcept.text; 
         }
         catch (err) {
             field = def;
         }
         return {
+            resource: resourceType,
             text: field
         }
     }
@@ -45,6 +47,7 @@ export class MedicationStatement {
 
     getDetails() {
         return {
+            resourceType: this.data.resourceType,
             text: this.data.extension[0].valueCodeableConcept.text
         }
     }
