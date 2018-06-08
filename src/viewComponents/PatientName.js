@@ -4,12 +4,16 @@ export class PatientName extends Component {
   
   constructor(props) {
     super(props);
+    this.passId = this.passId.bind(this)
+  }
 
+  passId(){
+    this.props.passId(this.props.iden)
   }
   
   render() {
     return (
-      <li onClick={ this.props.showEvents }> { this.props.name } { this.props.surname } </li>
+      <li onClick={ this.passId }> { this.props.name } { this.props.surname } </li>
     );
   }
 }

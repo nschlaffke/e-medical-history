@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Patient, MedicationStatement, Observation } from '../helpers/resourceManager'
+import { Patient } from '../helpers/resourceManager'
 import { PatientName } from './PatientName'
 import { Filter } from './Filter'
 import { EventsList } from './EventsList'
@@ -16,16 +16,15 @@ export class PatientsList extends Component {
     this.allMedicationStatements = []
 
     this.state = {
-      isFetched: false,
-      observations: false,
-      statemetns: false,
       searchedSurname: "",
       showEvents: false,
+      iden: -1,
     };
 
     this.fetchPatients();
 
     this.retrieveName = this.retrieveName.bind(this)
+    this.passId = this.passId.bind(this)
   }
 
   fetchPatients() {
@@ -55,39 +54,9 @@ export class PatientsList extends Component {
     this.setState({ searchedSurname: surname });
   }
 
-  fetchObservations(id){
-    fetch(this.serverUrl + "/Observation?patient=" + id + "&_sort=date&_format=json")
-      .then(blob => blob.json())
-      .then(obserations => {
-        this.allObservations = obserations.entry.map((observation) => {
-          return new Observation(observation.resource)
-        })
-      })
-      .catch(err => console.error(err));
-  }
-
-  fetchMedicationStatements(id){
-    fetch(this.serverUrl + "/MedicationRequest?patient=" + id + "&_format=json")
-      .then(blob => blob.json())
-      .then(statements => {
-        if(statements != null){
-          this.allMedicationStatements = statements.entry.map((statement) => {
-            return new MedicationStatement(statement.resource)
-          })
-          console.log(this.allMedicationStatements)
-        }
-      })
-      .catch(err => console.error(err));
-
-      console.log(this.serverUrl)
-  }
-
-  showEvents(id){
-    this.fetchObservations.call(this, id)
-    this.fetchMedicationStatements.call(this, id)
-    this.setState({ showEvents: true })
-    console.log(this.allObservations)
-    console.log(this.allMedicationStatements)
+  passId(id){
+    this.setState({iden: id})
+    this.setState({showEvents: true})
   }
 
   getNameList(surname){
@@ -100,9 +69,8 @@ export class PatientsList extends Component {
         return surname === patient.getSurname()
       }
     })
-    .map((patient) => {
-
-      return <PatientName key={ patient.getId() } showEvents={ () => {this.showEvents.call(this, patient.getId())} } name={ patient.getName() } surname={ patient.getSurname() } />;
+    .map((patient, index, array) => {
+      return <PatientName key={ index } iden={ patient.getId() } passId={ this.passId } name={ patient.getName() } surname={ patient.getSurname() } />;
     });
 
     return nameList;
@@ -111,12 +79,13 @@ export class PatientsList extends Component {
   ifShowEvents(surname){
     if(this.state.showEvents === true){
       return (
-        <EventsList allObservations={ this.allObservations } allMedicationStatements={ this.allMedicationStatements }/>
+        <EventsList serverUrl={ this.serverUrl } iden={ this.state.iden } />
       );
     }
     else {
       return (
         <div>
+          <Filter retrieveName={ this.retrieveName }/>
           <h1> The list of patients: </h1>
           <ol>
             { this.getNameList(surname) }
@@ -129,7 +98,6 @@ export class PatientsList extends Component {
   render() {
     return (
       <div>
-        <Filter retrieveName={ this.retrieveName }/>
          { this.ifShowEvents(this.state.searchedSurname) }
       </div> 
     );

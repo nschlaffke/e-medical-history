@@ -2,51 +2,17 @@ var serverUrl = "http://localhost:8080/baseDstu3"
 
 export class Observation {
     constructor(data) {
-        this.data = data
-        this.date = new Date(this.data.issued)
-    }
-
-    getDescription() {
-        return this.data.code.text
-    }
-
-    getDate() {
-        return this.date
-    }
-
-    getDetails() {
-        var field;
-        var def = "empty"
-        try {
-            field = this.data.valueCodeableConcept.text;
-        }
-        catch (err) {
-            field = def;
-        }
-        return {
-            text: field
-        }
+        this.description = data.code.text
+        this.details = typeof data.valueCodeableConcept !== "undefined" ? data.valueCodeableConcept.text : "empty"
+        this.date = data.issued
     }
 }
 
 export class MedicationStatement {
     constructor(data) {
-        this.data = data
-        this.date = new Date(this.data.authoredOn)
-    }
-
-    getDescription() {
-        return this.data.medicationCodeableConcept.text
-    }
-
-    getDate() {
-        return this.date
-    }
-
-    getDetails() {
-        return {
-            text: this.data.extension[0].valueCodeableConcept.text
-        }
+        this.description = data.medicationCodeableConcept.text
+        this.details = data.extension[0].valueCodeableConcept.text
+        this.date = data.authoredOn
     }
 }
 
@@ -137,35 +103,4 @@ export function showPatients() {
         });
 
         console.log(lol)
-}
-
-function getPatients() {
-    serverUrl = "http://localhost:8080/baseDstu3"
-    console.log(serverUrl)
-
-    var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-    var xmlHttp = new XMLHttpRequest();
-    var getPatientsUrl = serverUrl + "/Patient/?_format=json"
-    xmlHttp.open("GET", getPatientsUrl, false); // false for synchronous request
-    xmlHttp.send();
-    return JSON.parse(xmlHttp.responseText).entry.map((p) => {
-        return new Patient(p.resource)
-    })
-}
-
-function showPatients2() {
-
-    let patientList = getPatients()
-    console.log(patientList)
-    for (let patient of patientList) {
-        var events = patient.getAllEvents()
-        console.log(patient.getName(), patient.getSurname())
-        for (let event of events) {
-            var dateString = String(event.getDate())
-            var description = event.getDescription()
-            var details = event.getDetails()
-            console.log(dateString, ":", description)
-            console.log(details)
-        }
-    }
 }

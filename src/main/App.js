@@ -17,6 +17,7 @@ class App extends Component {
 
     showPatients();
 
+
     return (
       <div id="root">
         <PatientsList />
