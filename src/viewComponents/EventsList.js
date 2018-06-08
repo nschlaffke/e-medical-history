@@ -4,10 +4,6 @@ export class EventsList extends Component {
   
   constructor(props) {
     super(props);
-
-    this.state = {
-      isFetched: false
-    };
   }
   
   render() {

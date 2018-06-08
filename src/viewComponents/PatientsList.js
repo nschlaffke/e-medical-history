@@ -15,19 +15,21 @@ export class PatientsList extends Component {
     this.allObservations = []
     this.allMedicationStatements = []
 
-    this.retrieveName = this.retrieveName.bind(this)
-
     this.state = {
+      isFetched: false,
+      observations: false,
+      statemetns: false,
       searchedSurname: "",
       showEvents: false,
     };
-  }
 
-  componentWillMount() {
     this.fetchPatients();
+
+    this.retrieveName = this.retrieveName.bind(this)
   }
 
   fetchPatients() {
+    
     fetch(this.serverUrl + "/Patient/?_format=json")
       .then(blob => blob.json())
       .then(patients => {
@@ -35,6 +37,8 @@ export class PatientsList extends Component {
         this.allPatients = patients.entry.map((p) => {
           return new Patient(p.resource)
         });
+
+        this.setState({ isFetched: true })
       })
       .catch(err => console.error(err));
   }
@@ -53,13 +57,11 @@ export class PatientsList extends Component {
 
   fetchObservations(id){
     fetch(this.serverUrl + "/Observation?patient=" + id + "&_sort=date&_format=json")
-      .then(blob => blob.json().entry)
-      .then(entries => {
-        entries.map((observation) => {
-              return new Observation(observation.resource)
+      .then(blob => blob.json())
+      .then(obserations => {
+        this.allObservations = obserations.entry.map((observation) => {
+          return new Observation(observation.resource)
         })
-
-        this.allObservations = entries
       })
       .catch(err => console.error(err));
   }
@@ -67,42 +69,41 @@ export class PatientsList extends Component {
   fetchMedicationStatements(id){
     fetch(this.serverUrl + "/MedicationRequest?patient=" + id + "&_format=json")
       .then(blob => blob.json())
-      .then(entries => {
-
-        if(entries != null){
-          entries.map((statement) => {
-                return new MedicationStatement(statement.resource)
+      .then(statements => {
+        if(statements != null){
+          this.allMedicationStatements = statements.entry.map((statement) => {
+            return new MedicationStatement(statement.resource)
           })
-
-          this.allMedicationStatements = entries
+          console.log(this.allMedicationStatements)
         }
       })
       .catch(err => console.error(err));
+
+      console.log(this.serverUrl)
   }
 
   showEvents(id){
-    this.fetchObservations(id)
-    this.fetchMedicationStatements(id)
+    this.fetchObservations.call(this, id)
+    this.fetchMedicationStatements.call(this, id)
     this.setState({ showEvents: true })
+    console.log(this.allObservations)
+    console.log(this.allMedicationStatements)
   }
 
   getNameList(surname){
     var nameList = [];
-    
-    if(surname === ""){
-      nameList = this.allPatients.map((patient) => {
-
-        return <PatientName key={ patient.getId() } showEvents={ () => {this.showEvents(patient.getId())} } name={ patient.getName() } surname={ patient.getSurname() } />;
-      });
-    }
-
-    else {
-      for(let patient of this.allPatients){
-        if(surname === patient.getSurname()){
-          nameList.concat(<PatientName key={ patient.getId() } showEvents={ () => {this.showEvents(patient.getId())} } name={ patient.getName() } surname={ patient.getSurname() } />)
-        }
+    nameList = this.allPatients.filter((patient, index, array) => {
+      if(surname === ""){
+        return true
       }
-    }
+      else {
+        return surname === patient.getSurname()
+      }
+    })
+    .map((patient) => {
+
+      return <PatientName key={ patient.getId() } showEvents={ () => {this.showEvents.call(this, patient.getId())} } name={ patient.getName() } surname={ patient.getSurname() } />;
+    });
 
     return nameList;
   }
