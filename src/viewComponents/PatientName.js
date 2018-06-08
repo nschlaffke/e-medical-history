@@ -9,7 +9,7 @@ export class PatientName extends Component {
   
   render() {
     return (
-      <li> { this.props.name } { this.props.surname } </li>
+      <li onClick={ this.props.showEvents }> { this.props.name } { this.props.surname } </li>
     );
   }
 }

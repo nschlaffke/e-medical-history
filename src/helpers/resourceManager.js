@@ -1,6 +1,6 @@
 var serverUrl = "http://localhost:8080/baseDstu3"
 
-class Observation {
+export class Observation {
     constructor(data) {
         this.data = data
         this.date = new Date(this.data.issued)
@@ -29,7 +29,7 @@ class Observation {
     }
 }
 
-class MedicationStatement {
+export class MedicationStatement {
     constructor(data) {
         this.data = data
         this.date = new Date(this.data.authoredOn)

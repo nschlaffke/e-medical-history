@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class PatientsList extends Component {
+export class EventsList extends Component {
   
   constructor(props) {
     super(props);
@@ -13,9 +13,14 @@ class PatientsList extends Component {
   render() {
 
     return (
-      <View/>
+      <div>
+        <h1> Patient's observations: </h1>
+        <ul> { this.props.allObservations } </ul>
+        <h1> Medication Statement: </h1>
+        <ul> { this.props.allMedicationStatements } </ul>
+      </div>
     );
   }
 }
 
-export default App;
+export default EventsList;
